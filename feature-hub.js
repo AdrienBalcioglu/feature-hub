@@ -1,98 +1,139 @@
 (function() {
-  // Empêche le script d'être injecté deux fois
-  if (window.__featureHubLoaded) return;
-  window.__featureHubLoaded = true;
+  // Config locale (tu peux la remplacer par un fetch JSON plus tard)
+  const features = [
+    {
+      id: "dark-mode",
+      title: "Dark Mode",
+      description: "Essayez le nouveau thème sombre pour améliorer le confort visuel.",
+      cta: "Activer"
+    },
+    {
+      id: "ai-copilot",
+      title: "AI Copilot",
+      description: "Un assistant intelligent intégré pour vous aider à configurer vos campagnes.",
+      cta: "Tester"
+    },
+    {
+      id: "reports-v2",
+      title: "Rapports V2",
+      description: "Une refonte complète des analytics avec plus de détails et de filtres.",
+      cta: "Découvrir"
+    }
+  ];
 
-  // Création du container isolé avec Shadow DOM
-  const hubContainer = document.createElement("div");
-  hubContainer.id = "feature-hub";
-  document.body.appendChild(hubContainer);
+  // Création du conteneur flottant
+  const container = document.createElement("div");
+  container.id = "feature-hub-root";
+  document.body.appendChild(container);
 
-  const shadow = hubContainer.attachShadow({ mode: "open" });
+  const shadow = container.attachShadow({ mode: "open" });
 
   // Styles isolés
   const style = document.createElement("style");
   style.textContent = `
-    #hub-wrapper {
+    .fh-button {
       position: fixed;
       bottom: 20px;
       right: 20px;
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+      background: #4F46E5;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 30px;
       font-family: sans-serif;
-      width: 280px;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      transition: background 0.3s;
       z-index: 99999;
     }
-    #hub-header {
-      padding: 10px;
-      background: #0070f3;
-      color: white;
-      border-radius: 12px 12px 0 0;
+    .fh-button:hover { background: #4338CA; }
+
+    .fh-drawer {
+      position: fixed;
+      top: 0; right: -400px;
+      width: 350px;
+      height: 100%;
+      background: #fff;
+      box-shadow: -2px 0 10px rgba(0,0,0,0.2);
+      transition: right 0.3s ease;
+      padding: 20px;
+      overflow-y: auto;
+      font-family: sans-serif;
+      z-index: 99998;
+    }
+    .fh-drawer.open { right: 0; }
+
+    .fh-title {
+      font-size: 20px;
       font-weight: bold;
-      font-size: 14px;
+      margin-bottom: 15px;
+      color: #111;
     }
-    #hub-content {
-      padding: 10px;
-    }
-    .feature-card {
+    .fh-card {
       border: 1px solid #eee;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      padding: 8px;
-      cursor: pointer;
-      transition: background 0.2s;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
     }
-    .feature-card:hover {
-      background: #f5f5f5;
+    .fh-card h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      color: #222;
     }
-    .feature-title {
-      font-weight: bold;
-      font-size: 13px;
-      margin-bottom: 4px;
-    }
-    .feature-desc {
-      font-size: 12px;
+    .fh-card p {
+      margin: 0 0 12px;
+      font-size: 14px;
       color: #555;
     }
+    .fh-card button {
+      background: #4F46E5;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      color: white;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .fh-card button:hover { background: #4338CA; }
   `;
   shadow.appendChild(style);
 
-  // Contenu HTML
+  // HTML bouton + drawer
   const wrapper = document.createElement("div");
-  wrapper.id = "hub-wrapper";
   wrapper.innerHTML = `
-    <div id="hub-header">🚀 Feature Hub</div>
-    <div id="hub-content">
-      <div class="feature-card" data-feature="dark-mode">
-        <div class="feature-title">Dark Mode</div>
-        <div class="feature-desc">Essayez notre nouveau mode sombre.</div>
-      </div>
-      <div class="feature-card" data-feature="ai-copilot">
-        <div class="feature-title">AI Copilot</div>
-        <div class="feature-desc">Un assistant intelligent dans votre app.</div>
-      </div>
+    <div class="fh-button">✨ Découvrir les nouveautés</div>
+    <div class="fh-drawer">
+      <div class="fh-title">Nouvelles fonctionnalités</div>
+      ${features.map(f => `
+        <div class="fh-card">
+          <h3>${f.title}</h3>
+          <p>${f.description}</p>
+          <button data-id="${f.id}">${f.cta}</button>
+        </div>
+      `).join("")}
     </div>
   `;
   shadow.appendChild(wrapper);
 
-  // Tracking des clics
-  shadow.querySelectorAll(".feature-card").forEach(card => {
-    card.addEventListener("click", () => {
-      const featureName = card.dataset.feature;
-
-      // Envoi dans le dataLayer pour GTM
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({
-        event: "feature_hub_click",
-        feature: featureName,
-        timestamp: Date.now()
-      });
-
-      alert(`Merci pour votre intérêt dans: ${featureName} 🚀`);
-    });
+  // Logique d’interaction
+  const btn = shadow.querySelector(".fh-button");
+  const drawer = shadow.querySelector(".fh-drawer");
+  btn.addEventListener("click", () => {
+    drawer.classList.toggle("open");
   });
 
-  console.log("[FeatureHub] Loaded successfully.");
+  shadow.querySelectorAll(".fh-card button").forEach(b => {
+    b.addEventListener("click", (e) => {
+      const fid = e.target.getAttribute("data-id");
+      // Tracking GTM
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: "featureHubClick",
+        featureId: fid
+      });
+      alert("Merci pour votre intérêt pour " + fid + " !");
+    });
+  });
 })();
+
