@@ -1,11 +1,24 @@
 {
-  "name": "bryj-app",
+  "name": "feature-hub",
   "version": "1.0.0",
   "private": true,
-  "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "react-native start",
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "test": "jest"
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "react": "18.2.0",
+    "react-native": "0.76.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.0",
+    "@babel/preset-env": "^7.24.0",
+    "@babel/preset-react": "^7.24.0",
+    "@react-native/eslint-config": "^0.76.0",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "metro-react-native-babel-preset": "0.80.0"
+  }
 }
